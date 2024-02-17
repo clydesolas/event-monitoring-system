@@ -96,33 +96,33 @@ function toggleTheme() {
           ></v-list-item>
         </RouterLink>
 
-        <RouterLink to="/Events" :class="[switchTheme.color, 'router-link']">
+        <RouterLink to="/StudentRecord" :class="[switchTheme.color, 'router-link']">
           <v-list-item
-            @click="setActiveItem('EventsView')"
-            :class="{ 'v-list-item--active': isRouteActive('/Events') }"
+            @click="setActiveItem('StudentsView')"
+            :class="{ 'v-list-item--active': isRouteActive('/Student') }"
             prepend-icon="mdi-account-school-outline"
             title="Student Record"
-            value="eventsView"
+            value="studentRecordView"
           ></v-list-item>
         </RouterLink>
 
-        <RouterLink to="/Events" :class="[switchTheme.color, 'router-link']">
+        <RouterLink to="/Report" :class="[switchTheme.color, 'router-link']">
           <v-list-item
-            @click="setActiveItem('EventsView')"
-            :class="{ 'v-list-item--active': isRouteActive('/Events') }"
+            @click="setActiveItem('ReportView')"
+            :class="{ 'v-list-item--active': isRouteActive('/Report') }"
             prepend-icon="mdi-chart-bar"
             title="Report"
-            value="eventsView"
+            value="reportView"
           ></v-list-item>
         </RouterLink>
 
-        <RouterLink to="/Events" :class="[switchTheme.color, 'router-link']">
+        <RouterLink to="/Archived" :class="[switchTheme.color, 'router-link']">
           <v-list-item
-            @click="setActiveItem('EventsView')"
-            :class="{ 'v-list-item--active': isRouteActive('/Events') }"
+            @click="setActiveItem('ArchivedFilesView')"
+            :class="{ 'v-list-item--active': isRouteActive('/Archived') }"
             prepend-icon="mdi-archive-outline"
             title="Archived Files"
-            value="eventsView"
+            value="archivedFilesView"
           ></v-list-item>
         </RouterLink>
         

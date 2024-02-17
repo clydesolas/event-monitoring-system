@@ -23,6 +23,25 @@
                 </v-text-field>
               </v-col>
               <v-col
+                cols="6"
+                sm="12"
+                md="6">
+                <v-select
+                label="Academic Year*"
+                :items="academicYears"
+                ></v-select>
+              </v-col>
+              <v-col
+                cols="6"
+                sm="12"
+                md="6">
+                <v-select
+                label="Semester*"
+                :items="['FIRST SEMESTER', 'SECOND SEMESTER']"
+                >
+              </v-select>
+              </v-col>
+              <v-col
                 cols="12"
                 sm="4"
                 md="4">
@@ -50,6 +69,7 @@
                 <v-text-field
                  class="bg-green-lighten-5"
                   label="Total Payment*"
+                  :rules="[rules.required, rules.isNumber]"
                   hint="Enter total fee of a student"
                   required>
                 </v-text-field>
@@ -90,7 +110,25 @@
   <script setup >
   import { ref, computed } from 'vue';
   import { useTheme } from 'vuetify'
+  import { format, subYears, getYear } from 'date-fns';
+  const currentDate = new Date();
+    const currentYear = getYear(currentDate);
 
+    const academicYears = computed(() => {
+    const lastYear = currentYear - 1;
+    const nextYear = currentYear + 1;
+
+    const currentAcademicYear = `A.Y. ${lastYear}-${currentYear}`;
+    const nextAcademicYear = `A.Y. ${currentYear}-${nextYear}`;
+
+    return [currentAcademicYear, nextAcademicYear];
+    });
+
+    const rules = {
+    required: (value) => !!value || 'This field is required',
+    isNumber: (value) => /^\d+$/.test(value) || 'Only numeric input is allowed',
+    };
+    
     const theme = useTheme()
     const isDarkTheme = computed(() => theme.global.current.value.dark);
     
