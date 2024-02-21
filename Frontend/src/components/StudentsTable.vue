@@ -1,127 +1,136 @@
 <template>
-    <v-card
+  <v-card
       flat
       title="Students List"
     >
-      <template v-slot:text>
-        <v-text-field
-          v-model="search"
-          label="Search"
-          prepend-inner-icon="mdi-magnify"
-          single-line
-          variant="outlined"
-          hide-details
-        ></v-text-field>
+    <v-card-title class="d-flex align-center text-center pe-2 px-2 mx-0">
+      <v-text-field
+        v-model="search"
+        prepend-inner-icon="mdi-magnify"
+        density="compact"
+        label="Search"
+        single-line
+        flat
+        hide-details
+        variant="solo-filled"
+      ></v-text-field>
+    </v-card-title>
+
+    <v-divider></v-divider>
+    <v-data-table v-model:search="search" :headers="headers" :items="filteredStudents">
+      <template v-slot:item="{ item }">
+        <tr>
+          <td>{{ item.student_number }}</td>
+          <td>{{ item.first_name }}</td>
+          <td>{{ item.middle_name }}</td>
+          <td>{{ item.last_name }}</td>
+          <td>{{ item.course }}</td>
+          
+        </tr>
       </template>
-  
-      <v-data-table
-        :headers="headers"
-        :items="desserts"
-        :search="search"
-      ></v-data-table>
-    </v-card>
-  </template>
-  <script>
-    export default {
-      data () {
-        return {
-          search: '',
-          headers: [
-            {
-              align: 'start',
-              key: 'name',
-              sortable: false,
-              title: 'Dessert (100g serving)',
-            },
-            { key: 'calories', title: 'Calories' },
-            { key: 'fat', title: 'Fat (g)' },
-            { key: 'carbs', title: 'Carbs (g)' },
-            { key: 'protein', title: 'Protein (g)' },
-            { key: 'iron', title: 'Iron (%)' },
-          ],
-          desserts: [
-            {
-              name: 'Frozen Yogurt',
-              calories: 159,
-              fat: 6.0,
-              carbs: 24,
-              protein: 4.0,
-              iron: 1,
-            },
-            {
-              name: 'Ice cream sandwich',
-              calories: 237,
-              fat: 9.0,
-              carbs: 37,
-              protein: 4.3,
-              iron: 1,
-            },
-            {
-              name: 'Eclair',
-              calories: 262,
-              fat: 16.0,
-              carbs: 23,
-              protein: 6.0,
-              iron: 7,
-            },
-            {
-              name: 'Cupcake',
-              calories: 305,
-              fat: 3.7,
-              carbs: 67,
-              protein: 4.3,
-              iron: 8,
-            },
-            {
-              name: 'Gingerbread',
-              calories: 356,
-              fat: 16.0,
-              carbs: 49,
-              protein: 3.9,
-              iron: 16,
-            },
-            {
-              name: 'Jelly bean',
-              calories: 375,
-              fat: 0.0,
-              carbs: 94,
-              protein: 0.0,
-              iron: 0,
-            },
-            {
-              name: 'Lollipop',
-              calories: 392,
-              fat: 0.2,
-              carbs: 98,
-              protein: 0,
-              iron: 2,
-            },
-            {
-              name: 'Honeycomb',
-              calories: 408,
-              fat: 3.2,
-              carbs: 87,
-              protein: 6.5,
-              iron: 45,
-            },
-            {
-              name: 'Donut',
-              calories: 452,
-              fat: 25.0,
-              carbs: 51,
-              protein: 4.9,
-              iron: 22,
-            },
-            {
-              name: 'KitKat',
-              calories: 518,
-              fat: 26.0,
-              carbs: 65,
-              protein: 7,
-              iron: 6,
-            },
-          ],
-        }
+    </v-data-table>
+    <v-alert
+    type="info"
+    title="Note:"
+    text="The students in this list may be duplicated, but with academic year and semester information. The system will automatically archive student records after 5 months, and they cannot be unarchived."
+    variant="tonal"
+  ></v-alert>
+   
+
+ <!-- Snackbar -->
+ <v-snackbar v-model="snackbar.show" :color="snackbar.color" multi-line>
+      {{ snackbar.message }}
+      <template v-slot:action="{ attrs }">
+        <v-btn text v-bind="attrs" @click="snackbar.show = false">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
+  </v-card>
+</template>
+<script>
+import axios from 'axios';
+
+export default {
+  data() {
+    return {
+      search: '',
+      students: [],
+      archiveDialog: false,
+      selectedStudent: null,
+      snackbar: {
+        show: false,
+        message: '',
+        color: '',
       },
-    }
-  </script>
+    };
+  },
+  
+  computed: {
+    filteredStudents() {
+      const searchLower = this.search.toLowerCase();
+      return this.students.filter(
+        (student) =>
+        student.student_number.toLowerCase().includes(searchLower) ||
+          student.fullname.toLowerCase().includes(searchLower)||
+          student.course.toLowerCase().includes(searchLower)||
+          student.academic_year.toLowerCase().includes(searchLower)||
+          student.semester.toLowerCase().includes(searchLower)
+      );
+    },
+    headers() {
+      return [
+        { title: 'Student Number', value: 'student_number' },
+        { title: 'First Name', value: 'first_name', sortable: true },
+        { title: 'Middle Name', value: 'middle_name', sortable: true },
+        { title: 'Last Name', value: 'last_name', sortable: true },
+        { title: 'Course', value: 'course', sortable: true },
+      ];
+    },
+  },
+  watch: {
+    event_id: 'fetchStudents', // Use watch to fetch students when event_id changes
+  },
+  created() {
+    // Fetch students initially
+    this.fetchStudents();
+
+    // Set up interval to fetch students every 5 seconds
+    this.intervalId = setInterval(this.fetchStudents, 15000);
+  },
+   beforeDestroy() {
+    // Clear the interval when the component is destroyed
+    clearInterval(this.intervalId);
+  },
+  methods: {
+    async fetchStudents() {
+      try {
+        const response = await axios.get(`http://127.0.0.1:8000/api/students/`,
+      {
+        headers: {
+          Authorization: `Bearer ${this.$store.getters.getToken}`,
+        },
+      }
+      );
+        this.students = response.data;
+      } catch (error) {
+        console.error('Error fetching students:', error);
+      }
+    },
+    openArchiveDialog(student) {
+      this.selectedStudent = student;
+      this.archiveDialog = true;
+    },
+    closeArchiveDialog() {
+      this.archiveDialog = false;
+    },
+   
+
+    showSnackbar(message, color) {
+      this.snackbar.message = message;
+      this.snackbar.color = color;
+      this.snackbar.show = true;
+    },
+  },
+};
+</script>

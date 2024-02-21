@@ -11,84 +11,77 @@
       </v-breadcrumbs>
       <v-container>
     
-        <v-card>
-          <v-row class="d-flex align-center">
-            <v-col>
-              <v-card-title class="text-h5">
-            {{ user.name }}
-          </v-card-title>
-            </v-col>
-            <v-col class="d-flex justify-end">
-              <v-btn class="ma-2" icon @click="openDialog">
-              <v-icon>mdi-pencil</v-icon>
-            </v-btn>
-            </v-col>
-          </v-row>
-          
-          <v-divider></v-divider>
-          <v-card-text>
-            <v-list>
-              <v-list-item-group>
-                <v-list-item>
-                  <v-list-item-content>
-                    <v-list-item-title>First Name</v-list-item-title>
-                    <v-list-item-subtitle>{{ user.name }}</v-list-item-subtitle>
-                  </v-list-item-content>
-                </v-list-item>
-                <v-list-item>
-                  <v-list-item-content>
-                    <v-list-item-title>Middle Name</v-list-item-title>
-                    <v-list-item-subtitle>{{ user.name }}</v-list-item-subtitle>
-                  </v-list-item-content>
-                </v-list-item>
-                <v-list-item>
-                  <v-list-item-content>
-                    <v-list-item-title>Last Name</v-list-item-title>
-                    <v-list-item-subtitle>{{ user.name }}</v-list-item-subtitle>
-                  </v-list-item-content>
-                </v-list-item>
-                <v-list-item>
-                  <v-list-item-content>
-                    <v-list-item-title>Birth date</v-list-item-title>
-                    <v-list-item-subtitle>{{ user.name }}</v-list-item-subtitle>
-                  </v-list-item-content>
-                </v-list-item>
-                <v-list-item>
-                  <v-list-item-content>
-                    <v-list-item-title>Sex</v-list-item-title>
-                    <v-list-item-subtitle>{{ user.name }}</v-list-item-subtitle>
-                  </v-list-item-content>
-                </v-list-item>
-                <v-list-item>
-                  <v-list-item-content>
-                    <v-list-item-title>Email</v-list-item-title>
-                    <v-list-item-subtitle>{{ user.email }}</v-list-item-subtitle>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list-item-group>
-            </v-list>
-          </v-card-text>
-        </v-card>
-   
+        <v-row>
+          <v-col cols="12" md="6"  >
+            <v-card>
+              <v-row class="d-flex align-center">
+                <v-col>
+                  <v-card-title >
+                Personal Information
+              </v-card-title>
+                </v-col>
+                <v-col class="d-flex justify-end">
+                <ProfileUpdate v-if="user.role === 'admin'"/>
+                </v-col>
+              </v-row>
+              
+              <v-divider></v-divider>
+              <v-card-text>
+                <v-list>
+                  <v-list-item-group>
+                    <v-list-item v-if="user.role === 'user'">
+                      <v-list-item-content>
+                        <v-list-item-title>Student Number</v-list-item-title>
+                        <v-list-item-subtitle>{{ user.student_number }}</v-list-item-subtitle>
+                      </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item >
+                      <v-list-item-content>
+                        <v-list-item-title>First Name</v-list-item-title>
+                        <v-list-item-subtitle>{{ user.first_name }}</v-list-item-subtitle>
+                      </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item>
+                      <v-list-item-content>
+                        <v-list-item-title>Middle Name</v-list-item-title>
+                        <v-list-item-subtitle>{{ user.middle_name }}</v-list-item-subtitle>
+                      </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item>
+                      <v-list-item-content>
+                        <v-list-item-title>Last Name</v-list-item-title>
+                        <v-list-item-subtitle>{{ user.last_name }}</v-list-item-subtitle>
+                      </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item v-if="user.role === 'user'">
+                      <v-list-item-content>
+                        <v-list-item-title>Birth date</v-list-item-title>
+                        <v-list-item-subtitle>{{ user.birth_date }}</v-list-item-subtitle>
+                      </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item v-if="user.role === 'user'">
+                      <v-list-item-content>
+                        <v-list-item-title>Sex</v-list-item-title>
+                        <v-list-item-subtitle>{{ user.sex }}</v-list-item-subtitle>
+                      </v-list-item-content>
+                    </v-list-item>
+                  
+                    <v-list-item>
+                      <v-list-item-content>
+                        <v-list-item-title>Email</v-list-item-title>
+                        <v-list-item-subtitle>{{ user.email }}</v-list-item-subtitle>
+                      </v-list-item-content>
+                    </v-list-item>
+                  </v-list-item-group>
+                </v-list>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        <v-col cols="12" md="6" >
+          <PasswordUpdate/>
+        </v-col>
+      </v-row>
 
-    <v-dialog persistent  v-model="dialog" max-width="600">
-      <v-card>
-        <v-card-title class="d-flex justify-space-between">
-          Edit Profile
-            <v-icon @click="closeDialog">mdi-close</v-icon>
-        </v-card-title>
-        <v-card-text>
-            <v-text-field v-model="user.name" label="Name"></v-text-field>
-            <v-text-field v-model="user.email" label="Email"></v-text-field>
-            <v-text-field v-model="user.bio" label="Bio"></v-text-field>
-            <v-text-field v-model="user.location" label="Location"></v-text-field>
-            <v-divider></v-divider>
-            <div class="d-flex justify-end">
-              <v-btn type="submit" color="amber-lighten-5">Save Changes</v-btn>
-            </div>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
   </v-container>
     </v-main>
   </v-layout>
@@ -96,20 +89,9 @@
 
 <script setup>
 import Sidebar from "@/components/Sidebar.vue";
-import PaidStudents from "@/components/PaidStudents.vue";
-import PaymentForm from "@/components/PaymentForm.vue";
+import ProfileUpdate from "@/components/ProfileUpdate.vue";
+import PasswordUpdate from "@/components/PasswordUpdate.vue";
 import { ref, onMounted } from 'vue';
-
-
-
-const dialog = ref(false);
-
-const openDialog = () => {
-  dialog.value = true;
-};
-  const closeDialog = () => {
-    dialog.value = false;
-  };
 
 </script>
 
@@ -124,8 +106,8 @@ export default {
   },
   components: {
     Sidebar,
-    PaidStudents,
-    PaymentForm,
+    ProfileUpdate,
+    PasswordUpdate
   },
   computed: {
       user() {
@@ -141,12 +123,8 @@ export default {
           to: '/Dashboard',
         },
         {
-          title: 'Events',
-          to: '/Events',
-        },
-        {
-          title: 'Details',
-          to: `/EventDetails/${this.pageId}`, 
+          title: 'Profile',
+          to: '/Profile',
         },
       ];
     },

@@ -17,6 +17,7 @@
             >
             <v-tab value="one">Students</v-tab>
             <v-tab value="two">Events</v-tab>
+            <v-tab value="three">Transactions</v-tab>
             </v-tabs>
 
             <v-card-text>
@@ -28,7 +29,10 @@
                 <v-window-item value="two">
                 <ArchivedEvents/>
                 </v-window-item>
-               
+
+                <v-window-item value="three">
+                <ArchivedTransactions/>
+                </v-window-item>
             </v-window>
             </v-card-text>
         </v-card>
@@ -40,6 +44,7 @@
   import Sidebar from "@/components/Sidebar.vue";
   import ArchivedStudents from "@/components/ArchivedStudents.vue";
   import ArchivedEvents from "@/components/ArchivedEvents.vue";
+  import ArchivedTransactions from "@/components/ArchivedTransactions.vue";
   
   export default {
     data: () => ({
@@ -53,6 +58,7 @@
       Sidebar,
       ArchivedStudents,
       ArchivedEvents,
+      ArchivedTransactions
     },
     computed: {
         user() {
@@ -68,13 +74,10 @@
             to: '/Dashboard',
           },
           {
-            title: 'Events',
-            to: '/Events',
+            title: 'Archived',
+            to: '/Archived',
           },
-          {
-            title: 'Details',
-            to: `/EventDetails/${this.pageId}`, 
-          },
+         
         ];
       },
     },

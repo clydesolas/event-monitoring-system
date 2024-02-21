@@ -1,127 +1,194 @@
 <template>
-    <v-card
-      flat
-      title="Students List"
-    >
-      <template v-slot:text>
-        <v-text-field
-          v-model="search"
-          label="Search"
-          prepend-inner-icon="mdi-magnify"
-          single-line
-          variant="outlined"
-          hide-details
-        ></v-text-field>
+  <v-card flat>
+    
+    <v-card-title class="d-flex align-center text-center pe-2 px-2 mx-0">
+      <v-text-field
+        v-model="search"
+        prepend-inner-icon="mdi-magnify"
+        density="compact"
+        label="Search"
+        single-line
+        flat
+        hide-details
+        variant="solo-filled"
+      ></v-text-field>
+    </v-card-title>
+
+    <v-divider></v-divider>
+    
+    <v-data-table v-model:search="search" :headers="headers" :items="filteredevents">
+      <template v-slot:item="{ item }">
+        <tr>
+          <td>{{ item.event_id }}</td>
+          <td>{{ item.title }}</td>
+          <td>{{ item.academic_year }}</td>
+          <td>{{ item.semester }}</td>
+          <td>{{ new Date(item.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true }) }}</td>
+          <!-- Add other fields as needed -->
+          <td>
+            <v-btn @click="openArchiveDialog(item)" elevation="0" class="" icon>
+              <v-icon color="grey">mdi-archive</v-icon>
+              <v-tooltip activator="parent" location="bottom">Unarchive?</v-tooltip>
+            </v-btn>
+          </td>
+        </tr>
       </template>
+    </v-data-table>
   
-      <v-data-table
-        :headers="headers"
-        :items="desserts"
-        :search="search"
-      ></v-data-table>
-    </v-card>
-  </template>
-  <script>
-    export default {
-      data () {
-        return {
-          search: '',
-          headers: [
-            {
-              align: 'start',
-              key: 'name',
-              sortable: false,
-              title: 'Dessert (100g serving)',
-            },
-            { key: 'calories', title: 'Calories' },
-            { key: 'fat', title: 'Fat (g)' },
-            { key: 'carbs', title: 'Carbs (g)' },
-            { key: 'protein', title: 'Protein (g)' },
-            { key: 'iron', title: 'Iron (%)' },
-          ],
-          desserts: [
-            {
-              name: 'Frozen Yogurt',
-              calories: 159,
-              fat: 6.0,
-              carbs: 24,
-              protein: 4.0,
-              iron: 1,
-            },
-            {
-              name: 'Ice cream sandwich',
-              calories: 237,
-              fat: 9.0,
-              carbs: 37,
-              protein: 4.3,
-              iron: 1,
-            },
-            {
-              name: 'Eclair',
-              calories: 262,
-              fat: 16.0,
-              carbs: 23,
-              protein: 6.0,
-              iron: 7,
-            },
-            {
-              name: 'Cupcake',
-              calories: 305,
-              fat: 3.7,
-              carbs: 67,
-              protein: 4.3,
-              iron: 8,
-            },
-            {
-              name: 'Gingerbread',
-              calories: 356,
-              fat: 16.0,
-              carbs: 49,
-              protein: 3.9,
-              iron: 16,
-            },
-            {
-              name: 'Jelly bean',
-              calories: 375,
-              fat: 0.0,
-              carbs: 94,
-              protein: 0.0,
-              iron: 0,
-            },
-            {
-              name: 'Lollipop',
-              calories: 392,
-              fat: 0.2,
-              carbs: 98,
-              protein: 0,
-              iron: 2,
-            },
-            {
-              name: 'Honeycomb',
-              calories: 408,
-              fat: 3.2,
-              carbs: 87,
-              protein: 6.5,
-              iron: 45,
-            },
-            {
-              name: 'Donut',
-              calories: 452,
-              fat: 25.0,
-              carbs: 51,
-              protein: 4.9,
-              iron: 22,
-            },
-            {
-              name: 'KitKat',
-              calories: 518,
-              fat: 26.0,
-              carbs: 65,
-              protein: 7,
-              iron: 6,
-            },
-          ],
-        }
+    <!-- Archive Dialog -->
+    <v-dialog v-model="archiveDialog" max-width="400">
+      <v-card>
+        <v-card-title class="headline">Undo Archive</v-card-title>
+        <v-card-text>
+          Are you sure you want to unarchive this event? 
+        </v-card-text>
+        <v-card-actions>
+          <v-btn @click="archiveTransaction" color="primary" text>
+            Confirm
+          </v-btn>
+          <v-btn @click="closeArchiveDialog" color="red" text>
+            Cancel
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+ <!-- Snackbar -->
+ <v-snackbar v-model="snackbar.show" :color="snackbar.color" multi-line>
+      {{ snackbar.message }}
+      <template v-slot:action="{ attrs }">
+        <v-btn text v-bind="attrs" @click="snackbar.show = false">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
+  </v-card>
+</template>
+<script>
+import axios from 'axios';
+
+export default {
+  data() {
+    return {
+      search: '',
+      events: [],
+      archiveDialog: false,
+      selectedevent: null,
+      snackbar: {
+        show: false,
+        message: '',
+        color: '',
       },
+    };
+  },
+  props: {
+    title: String,
+    event_id: String,
+  },
+  computed: {
+    filteredevents() {
+      const searchLower = this.search.toLowerCase();
+      return this.events.filter(
+        (event) =>
+          event.event_id.toLowerCase().includes(searchLower) ||
+          event.title.toLowerCase().includes(searchLower) ||
+          event.academic_year.toLowerCase().includes(searchLower) ||
+          event.semester.toLowerCase().includes(searchLower) ||
+          event.date.toLowerCase().includes(searchLower) ||
+          event.created_at.toLowerCase().includes(searchLower) ||
+          event.duration_date.toLowerCase().includes(searchLower) ||
+          event.due_date.toLowerCase().includes(searchLower) 
+
+          
+      );
+    },
+    headers() {
+      return [
+        { title: 'Event ID', value: 'event_id' },
+        { title: 'Title', value: 'title', sortable: true },
+        { title: 'Academic Year', value: 'academic_year', sortable: true },
+        { title: 'Semester', value: 'semester', sortable: true },
+        { title: 'Date Added', value: 'created_at', sortable: true },
+        { title: 'Action', value: 'action', sortable: false },
+
+      ];
+    },
+  },
+  watch: {
+    event_id: 'fetchevents', // Use watch to fetch events when event_id changes
+  },
+  created() {
+    // Fetch events initially
+    this.fetchevents();
+
+    // Set up interval to fetch events every 5 seconds
+    this.intervalId = setInterval(this.fetchevents, 5000);
+  },
+  destroyed() {
+    // Clear the interval when the component is destroyed
+    clearInterval(this.intervalId);
+  },
+     methods: {
+  async fetchevents() {
+    try {
+      const response = await axios.get(
+        'http://127.0.0.1:8000/api/get-archived-events',
+        {
+          headers: {
+            Authorization: `Bearer ${this.$store.getters.getToken}`,
+          },
+        }
+      );
+
+      // Update the events array by transforming the data
+      this.events = response.data.map(event => {
+        return {
+          ...event,
+          fullname: `${event.first_name} ${event.last_name}`,
+          course: `${event.course}`,
+        };
+      });
+    } catch (error) {
+      console.error('Error fetching events:', error);
     }
-  </script>
+  },
+    openArchiveDialog(event) {
+      this.selectedevent = event;
+      this.archiveDialog = true;
+    },
+    closeArchiveDialog() {
+      this.archiveDialog = false;
+    },
+    async archiveTransaction() {
+      try {
+        const response = await axios.put(`http://127.0.0.1:8000/api/update-event/${this.selectedevent.id}`, {
+          status: 'ACTIVE',
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${this.$store.getters.getToken}`,
+          },
+        }
+        );
+        console.log(response.data);
+
+        // Show success Snackbar
+        this.showSnackbar('Event unarchived successfully', 'success');
+      } catch (error) {
+        console.error('Error archiving transaction:', error);
+
+        // Show error Snackbar
+        this.showSnackbar('Error unarchiving event', 'error');
+      } finally {
+        this.closeArchiveDialog();
+      }
+    },
+
+    showSnackbar(message, color) {
+      this.snackbar.message = message;
+      this.snackbar.color = color;
+      this.snackbar.show = true;
+    },
+  },
+};
+</script>

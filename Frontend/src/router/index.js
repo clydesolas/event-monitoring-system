@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import DashboardView from '../views/DashboardView.vue';
 import LoginView from '../views/LoginView.vue';
+import RegisterView from '../views/RegisterView.vue';
 import EventsView from '../views/EventsView.vue';
 import EventDetails from '../views/EventDetails.vue';
 import ProfileView from '@/views/ProfileView.vue';
@@ -18,14 +19,22 @@ const router = createRouter({
       component: LoginView
     },
     {
+      path: '/Register',
+      name: 'Register',
+      component: RegisterView
+    },
+    {
       path: '/Dashboard',
       name: 'DashboardView',
       component: DashboardView,
       beforeEnter: (to, from, next) => {
         const isAuthenticated = store.getters.getToken;
         const user = store.getters.getUser;
-        if(isAuthenticated && user.role == 'admin'){
+        if(isAuthenticated ){
           next();
+        }
+        else{
+          next('/');
         }
       }
     },
@@ -39,6 +48,9 @@ const router = createRouter({
         if(isAuthenticated && user.role == 'admin'){
           next();
         }
+        else{
+          next('/');
+        }
       }
     },
     {
@@ -50,6 +62,9 @@ const router = createRouter({
         const user = store.getters.getUser;
         if(isAuthenticated && user.role == 'admin'){
           next();
+        }
+        else{
+          next('/');
         }
       }
     },
@@ -63,6 +78,9 @@ const router = createRouter({
         if(isAuthenticated && user.role == 'admin'){
           next();
         }
+        else{
+          next('/');
+        }
       }
     },
     {
@@ -74,6 +92,9 @@ const router = createRouter({
         const user = store.getters.getUser;
         if(isAuthenticated && user.role == 'admin'){
           next();
+        }
+        else{
+          next('/');
         }
       }
     },
@@ -87,6 +108,9 @@ const router = createRouter({
         if(isAuthenticated && user.role == 'admin'){
           next();
         }
+        else{
+          next('/');
+        }
       }
     },
     {
@@ -98,6 +122,9 @@ const router = createRouter({
         const user = store.getters.getUser;
         if(isAuthenticated && user.role == 'admin'){
           next();
+        }
+        else{
+          next('/');
         }
       }
     },

@@ -12,10 +12,10 @@
         <!-- <p>Event Name {{ pageId }}</p> -->
         <v-row class="px-4 d-flex justify-center">
           <v-col cols="md-8">
-            <ReportTable />
+            <ReportTable :modelValue="selectedOptions" />
           </v-col>
           <v-col cols="md-4">
-            <ReportForm/>
+            <ReportForm v-model="selectedOptions" />
           </v-col>
         </v-row>
       </v-main>
@@ -30,6 +30,11 @@
   export default {
     data: () => ({
         pageId: null,
+        selectedOptions: {
+        selectedAcademicYear: 'all',
+        selectedSemester: 'all',
+        selectedEvent: 'all',
+      },
     }),
     created() {
       this.pageId = this.$route.params.pageId;

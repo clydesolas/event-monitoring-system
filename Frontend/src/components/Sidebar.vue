@@ -72,7 +72,7 @@ function toggleTheme() {
   
     <v-navigation-drawer app class="ma-2 rounded-lg" v-model="drawer">
       <v-list>
-        <v-list-item :title="user.name" :subtitle="user.email"></v-list-item>
+        <v-list-item :title="user.first_name+' '+user.last_name" :subtitle="user.student_number"></v-list-item>
       </v-list>
       <v-divider></v-divider>
   
@@ -98,8 +98,8 @@ function toggleTheme() {
 
         <RouterLink to="/StudentRecord" :class="[switchTheme.color, 'router-link']">
           <v-list-item
-            @click="setActiveItem('StudentsView')"
-            :class="{ 'v-list-item--active': isRouteActive('/Student') }"
+            @click="setActiveItem('StudentRecordView')"
+            :class="{ 'v-list-item--active': isRouteActive('/StudentRecord') }"
             prepend-icon="mdi-account-school-outline"
             title="Student Record"
             value="studentRecordView"
@@ -175,26 +175,27 @@ function toggleTheme() {
         return this.$route.path === route;
       },
       async logout() {
-      try {
-        const response = await this.$axios.post(
-          "http://127.0.0.1:8000/api/logout",
-          null,
-          {
-            headers: {
-              Authorization: `Bearer ${this.$store.getters.getToken}`,
-            },
-          }
-        );
-
-        // Remove the token from localStorage or Vuex store
-        this.$store.dispatch("clearToken");
-
-        // Redirect to login page
-        this.$router.push({ name: "Login" });
-      } catch (error) {
-        console.error("Logout failed", error);
+  try {
+    const response = await this.$axios.post(
+      "http://127.0.0.1:8000/api/logout",
+      null,
+      {
+        headers: {
+          Authorization: `Bearer ${this.$store.getters.getToken}`,
+        },
       }
-    },
+    );
+
+    // Remove the token from localStorage or Vuex store
+    this.$store.dispatch("clearToken");
+    // Redirect to login page
+    this.$router.push({ name: "Login" });
+
+  } catch (error) {
+    console.error("Logout failed", error);
+  }
+},
+
     },
   };
   </script>

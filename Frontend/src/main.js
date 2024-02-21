@@ -12,6 +12,7 @@ import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import VCalendar from 'v-calendar';
 import 'v-calendar/style.css';
+import VueApexCharts from "vue3-apexcharts";
 
 
 
@@ -37,6 +38,7 @@ const vuetify = createVuetify({
 });
 
 const app = createApp(App);
+app.use(VueApexCharts);
 
 // Use plugin with optional defaults
 app.use(VCalendar, {})

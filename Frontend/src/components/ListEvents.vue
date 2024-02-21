@@ -11,7 +11,7 @@
         <v-btn @click="toggleSearch" variant="text" icon="mdi-magnify"></v-btn>
       </v-toolbar>
   
-      <v-infinite-scroll color="brown" mode="manual" height="430" @load="load">
+      <v-sheet class="overflow-y-auto" color="brown" mode="manual" height="430" >
         <v-list lines="two">
           <v-list-item
             class="ma-1 border-t-sm"
@@ -32,123 +32,88 @@
             </template>
           </v-list-item>
         </v-list>
-      </v-infinite-scroll>
+      </v-sheet>
   
     </v-card>
   </template>
 
-  <script>
+<script>
+import axios from 'axios';
+
 export default {
   data: () => ({
     isSearchExpanded: false,
     search: "",
     selectedFolderId: null,
-    notifications: false,
-    sound: true,
-    widgets: false,
-    dialog: false,
-    folders: [
-      {
-        id: 1,
-        subtitle: 'Jan 9, 2014',
-        title: 'Fieldtrip',
-      },
-      {
-        id:3,
-        subtitle: 'Jan 17, 2014',
-        title: 'Graduation Ceremony',
-      },
-      {
-        id:4,
-        subtitle: 'Jan 28, 2014',
-        title: 'xzxc',
-      },
-      {
-        id:5,
-        subtitle: 'Feb 5, 2014',
-        title: 'Science Fair',
-      },
-      {
-        id: 34,
-        subtitle: 'Feb 14, 2014',
-        title: 'Valentine’s Day Celebration',
-      },
-      {
-        id:23,
-        subtitle: 'Mar 3, 2014',
-        title: 'Sports Day',
-      },
-      {
-        id:12,
-        subtitle: 'Mar 12, 2014',
-        title: 'Art Exhibition',
-      },
-      {
-        id:121,
-        subtitle: 'Apr 8, 2014',
-        title: 'Parent-Teacher Meeting',
-      },
-      {
-        id:31,
-        subtitle: 'Apr 22, 2014',
-        title: 'Book Fair',
-      },
-      {
-        id:11,
-        subtitle: 'May 7, 2014',
-        title: 'Music Recital',
-      },
-    //   {
-    //     subtitle: 'May 21, 2014',
-    //     title: 'School Picnic',
-    //   },
-    //   {
-    //     subtitle: 'Jun 2, 2014',
-    //     title: 'End-of-Year Assembly',
-    //   },
-    //   {
-    //     subtitle: 'Jun 15, 2014',
-    //     title: 'Summer Camp Begins',
-    //   },
-    ],
-    displayedItemCount: 5,
+    folders: [],
   }),
+
   computed: {
-  filteredFolders() {
-    return this.folders.filter((folder) =>
-      folder.title.toLowerCase().includes(this.search.toLowerCase())
-    );
-  },
-  switchTheme(){
+    filteredFolders() {
+      return this.folders.filter((folder) =>
+        folder.title.toLowerCase().includes(this.search.toLowerCase())
+      );
+    },
+    switchTheme() {
       return this.$store.getters.getSwitchTheme;
     }
-},
+  },
 
   methods: {
     toggleSearch() {
       this.isSearchExpanded = !this.isSearchExpanded;
     },
-    loadMore() {
-    if (this.displayedItemCount < this.filteredFolders.length) {
-        this.displayedItemCount += 5;
-    }
+    
+    formatDate(dateString) {
+      const options = { month: 'short', day: 'numeric', year: 'numeric' };
+      const formattedDate = new Date(dateString).toLocaleDateString('en-US', options);
+      return formattedDate;
     },
-
-    load({ done }) {
-      setTimeout(() => {
-        done('empty');
-      }, 1000);
+    
+    async loadData() {
+      try {
+        console.log('Fetching data...');
+        const response = await axios.get('http://127.0.0.1:8000/api/events-get-all',
+        {
+          headers: {
+            Authorization: `Bearer ${this.$store.getters.getToken}`,
+          },
+        });
+        this.folders = response.data.map(item => ({
+          id: item.id,
+          title: item.title,
+          event_id: item.event_id,
+          subtitle: 'Date: '+this.formatDate(item.date)+' | ID: '+item.event_id,
+        }));
+        console.log('Data fetched successfully:', this.folders);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      }
     },
+   
     openNewPage(folderId) {
-    this.selectedFolderId = folderId;
-    // Assuming you have a route named 'eventDetails' with a parameter 'id'
-    this.$router.push({ name: 'EventDetails', params: { pageId: folderId } });
+      this.selectedFolderId = folderId;
+      this.$router.push({ name: 'EventDetails', params: { pageId: folderId } });
     },
   },
- 
-};
 
+  created() {
+    console.log('Component is created');
+    this.loadData();
+
+    // Fetch data every 5 seconds
+    this.fetchDataInterval = setInterval(() => {
+      this.loadData();
+    }, 7000);
+  },
+
+  beforeDestroy() {
+    clearInterval(this.fetchDataInterval);
+  },
+};
 </script>
+
+
 
 
 <style scoped>
