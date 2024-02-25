@@ -143,28 +143,50 @@ export default {
 },
 
 downloadFile(response, filename) {
-      const blob = new Blob([response.data], { type: response.headers['content-type'] });
-      const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = filename;
-      link.click();
-    },
+  // Decode the Base64 data
+  const decodedData = atob(response.data);
+
+  // Convert the decoded data to a Uint8Array
+  const uint8Array = new Uint8Array(decodedData.length);
+  for (let i = 0; i < decodedData.length; i++) {
+    uint8Array[i] = decodedData.charCodeAt(i);
+  }
+
+  // Create a Blob from the Uint8Array
+  const blob = new Blob([uint8Array], { type: 'application/pdf' });
+
+  // Create a link element and trigger the download
+  const link = document.createElement('a');
+  link.href = window.URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+},
+
 
     async generateReport() {
       try {
         const response = await this.$axios.post('http://127.0.0.1:8000/api/transactions-export-excel', 
-        null,{
-          headers: {
-            Authorization: `Bearer ${this.$store.getters.getToken}`,
-          },
-        },
         {
           academic_year: this.selectedAcademicYear,
           semester: this.selectedSemester,
           event_id: this.selectedEvent,
-        }, { responseType: 'arraybuffer' });
+        },
+        {
+            headers: {
+              Authorization: `Bearer ${this.$store.getters.getToken}`,
+            },
+            responseType: 'blob', // Set responseType to 'blob' for binary data (PDF)
+          },
+        );
 
-        this.downloadFile(response, 'report.xlsx');
+       // Create a Blob from the response data
+       const blob = new Blob([response.data], { type: 'application/excel' });
+      // Create a link element and trigger a download
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `transaction_report.xlsx`;
+      link.click();
+
       } catch (error) {
         console.error('Error generating Excel report:', error);
       }
@@ -177,13 +199,21 @@ downloadFile(response, filename) {
           semester: this.selectedSemester,
           event_id: this.selectedEvent,
         }, {
-          headers: {
-            Authorization: `Bearer ${this.$store.getters.getToken}`,
-          },
-        },
-        { responseType: 'arraybuffer' });
+            headers: {
+              Authorization: `Bearer ${this.$store.getters.getToken}`,
+            },
+            responseType: 'blob', // Set responseType to 'blob' for binary data (PDF)
+          });
 
-        this.downloadFile(response, 'report.pdf');
+        // Create a Blob from the response data
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+
+        // Create a link element and trigger a download
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = `transaction_report.pdf`;
+        link.click();
+
       } catch (error) {
         console.error('Error generating PDF report:', error);
       }

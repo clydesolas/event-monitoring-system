@@ -17,6 +17,7 @@ class AuthController extends Controller
             'first_name' => 'required|string',
             'middle_name' => 'required|string',
             'last_name' => 'required|string',
+            'course' => 'required|string',
             'sex' => 'required|string',
             'birth_date' => 'required|string',
             'email' => 'required|string|unique:users,email',
@@ -28,6 +29,7 @@ class AuthController extends Controller
             'first_name'=> $data['first_name'],
             'middle_name'=> $data['middle_name'],
             'last_name'=> $data['last_name'],
+            'course'=> $data['course'],
             'sex'=> $data['sex'],
             'birth_date'=> $data['birth_date'],
             'email'=> $data['email'],
@@ -125,6 +127,7 @@ class AuthController extends Controller
     
         return response()->json(['message' => 'Password changed successfully']);
     }
+    
 
     public function sendOtpEmail(Request $request)
     {

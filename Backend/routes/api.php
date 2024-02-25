@@ -7,7 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EventsController;
 use App\Http\Controllers\TransactionsController;
 use Illuminate\Support\Facades\Auth;
-
+use App\Http\Controllers\BackupController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -24,31 +24,37 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']); 
 Route::get('/students', [StudentController::class, 'index']); 
 Route::get('/event-count-by-month-current-year', [EventsController::class, 'getCountByMonthCurrentYear']);
-
 Route::post('/archive-students', [StudentController::class, 'archiveStudents']);
+Route::get('/get-archived-transactions', [TransactionsController::class, 'getArchived']);
+Route::get('/students/{student_number}', [StudentController::class, 'show']); 
+Route::get('/backup', [BackupController::class, 'createBackup']);
 
-Route::group(['middleware'=> ['auth:sanctum', 'restrictRole:user']], function(){
+
+Route::group(['middleware'=> ['auth:sanctum']], function(){
     Route::get('/students', [StudentController::class, 'index']); 
-    Route::post('/logout', [AuthController::class, 'logout']); 
-    Route::put('/update-password', [AuthController::class, 'changePassword']); 
+    Route::get('/events-get-all', [EventsController::class, 'index']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::put('/update-password', [AuthController::class, 'changePassword']);
+    Route::get('/upcoming-events-get-all', [EventsController::class, 'upcomingEvents']);
+    Route::get('/check-events-get-all', [EventsController::class, 'userCheckEventChart']);
+    Route::get('/show-student-transaction/{student_number}', [TransactionsController::class, 'showStudentTransaction']);
+    
+    Route::post('/student-export-pdf', [TransactionsController::class, 'exportStudentTransaction']);
+
 });
 
-Route::group(['middleware'=> ['auth:sanctum', 'restrictRole:admin']], function(){
+    Route::group(['middleware'=> ['auth:sanctum', 'restrictRole:admin']], function(){
     Route::delete('/students/{id}', [StudentController::class, 'destroy']); 
     Route::get('/students', [StudentController::class, 'index']); 
     Route::get('/get-archived-students', [StudentController::class, 'getArchivedStudents']); 
     Route::put('/update-profile', [AuthController::class, 'update']); 
-    Route::put('/update-password', [AuthController::class, 'changePassword']); 
-    Route::get('/events-get-all', [EventsController::class, 'index']);
     Route::put('/students/{id}', [StudentController::class, 'update']); 
-    Route::post('/logout', [AuthController::class, 'logout']); 
     Route::post('/upload-excel', [StudentController::class, 'uploadExcel']);
     Route::put('/update-status', [StudentController::class, 'updateStatus']);
     Route::get('/distinct-semesters-and-years', [StudentController::class, 'listDistinctSemestersAndYears']);
     Route::post('/events-export-excel', [EventsController::class, 'exportExcel']);
     Route::post('/check-existence', [AuthController::class, 'checkExistence']);
     Route::post('/export-to-pdf', [EventsController::class, 'exportToPdfApi']);
-    Route::get('/events-get-all', [EventsController::class, 'index']);
     Route::post('/store-event', [EventsController::class, 'store']);
     Route::get('/get-archived-events', [EventsController::class, 'getArchived']);
     Route::put('/update-event/{id}', [EventsController::class, 'update']);
@@ -58,12 +64,10 @@ Route::group(['middleware'=> ['auth:sanctum', 'restrictRole:admin']], function()
     Route::get('/transactions-get-all', [TransactionsController::class, 'index']);
     Route::put('/update-transaction/{id}', [TransactionsController::class, 'update']);
     Route::get('/transactions-display-report/{event_id}/{academic_year}/{semester}', [TransactionsController::class, 'displayReport']);
-    Route::get('/students/{student_number}', [StudentController::class, 'show']); 
     Route::get('/academic-year/{academic_year}', [StudentController::class, 'getDistinctAcademicYears']); 
     Route::get('/semester/{semester}', [StudentController::class, 'getDistinctSemesters']); 
     Route::get('/students/search/{name}', [StudentController::class, 'search']);
     Route::get('/enrolled-students-count', [StudentController::class, 'getEnrolledStudentsCount']);
-    Route::get('/get-archived-transactions', [TransactionsController::class, 'getArchived']);
     Route::post('/transactions-export-pdf', [TransactionsController::class, 'exportToPdfApi']);
     Route::post('/check-transaction', [TransactionsController::class, 'check']);
     Route::get('/show-transaction/{event_id}', [TransactionsController::class, 'show']);

@@ -3,6 +3,8 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -28,6 +30,23 @@ return new class extends Migration
             $table->rememberToken();
             $table->timestamps();
         });
+
+        // Insert admin user
+        DB::table('users')->insert([
+            'student_number' => 'ADMIN',
+            'first_name' => 'Admin',
+            'middle_name' => 'Admin',
+            'last_name' => 'Admin',
+            'course' => 'Admin Course',
+            'sex' => 'Male', // or 'Female' based on your application
+            'birth_date' => '1990-01-01', // Change as needed
+            'role' => 'admin',
+            'email' => 'admin@gmail.com',
+            'status' => 'ENROLLED',
+            'password' => Hash::make('password'), // Hash the password
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 
     /**

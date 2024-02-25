@@ -1,11 +1,11 @@
 <template>
-  <div>
+  <v-card>
     <apexchart
       type="bar"
       :options="chartOptions"
       :series="chartSeries"
     ></apexchart>
-  </div>
+  </v-card>
 </template>
 
 <script>
@@ -20,7 +20,6 @@ export default {
       chartOptions: {
         chart: {
           type: "bar",
-          background: '#f0ece5',
         },
         plotOptions: {
           bar: {

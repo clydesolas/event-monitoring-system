@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('event_id');
             $table->string('title');
             $table->string('description');
-            $table->string('payment');
+            $table->float('payment');
             $table->string('date');
             $table->string('duration_date');
             $table->string('due_date');

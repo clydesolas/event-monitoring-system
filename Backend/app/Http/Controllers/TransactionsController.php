@@ -8,6 +8,8 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use App\Exports\TransactionsExport;
 use App\Exports\TransactionsPdfExport;
+use App\Exports\StudentTransactionPdf;
+
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB; 
 use Carbon\Carbon;
@@ -20,6 +22,12 @@ class TransactionsController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+     public function event()
+     {
+         return $this->belongsTo(Events::class, 'event_id', 'event_id');
+     }
+
     public function index()
     {
         return Transactions::all();
@@ -31,6 +39,7 @@ class TransactionsController extends Controller
                     ->orderBy('date', 'desc')
                     ->get();
     }
+
     public function getCountByMonthCurrentYear()
     {
         $currentYear = Carbon::now()->year;
@@ -111,6 +120,16 @@ class TransactionsController extends Controller
          $pdfExport = new TransactionsPdfExport($academicYear, $semester, $event_id);
          return $pdfExport->exportToPdfResponse();
      }
+
+     public function exportStudentTransaction(Request $request)
+     {
+         $requestData = $request->json()->all();
+     
+         $transaction_id = $requestData['transaction_id'] ?? null;
+     
+         $pdfExport = new StudentTransactionPdf($transaction_id);
+         return $pdfExport->exportToPdfResponse();
+     }
      
     public function store(Request $request)
     {
@@ -151,6 +170,14 @@ class TransactionsController extends Controller
     public function show(string $event_id)
     {
         return Transactions::where('event_id', $event_id)
+            ->where('status', '!=', 'ARCHIVED')
+            ->orderBy('date', 'desc')
+            ->get();
+    }
+
+    public function showStudentTransaction(string $student_number)
+    {
+        return Transactions::where('student_number', $student_number)
             ->where('status', '!=', 'ARCHIVED')
             ->orderBy('date', 'desc')
             ->get();

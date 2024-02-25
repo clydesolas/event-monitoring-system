@@ -86,7 +86,17 @@ function toggleTheme() {
         value="myfiles"
       ></v-list-item>
     </RouterLink>
-        <RouterLink to="/Events" :class="[switchTheme.color, 'router-link']">
+        <RouterLink to="/Transactions" v-if="user.role === 'user'" :class="[switchTheme.color, 'router-link']">
+          <v-list-item
+            @click="setActiveItem('TransactionsView')"
+            :class="{ 'v-list-item--active': isRouteActive('/Transactions') }"
+            prepend-icon="mdi-cash-check"
+            title="Transactions"
+            value="TransactionsView"
+          ></v-list-item>
+        </RouterLink>
+
+        <RouterLink to="/Events" v-if="user.role === 'admin'" :class="[switchTheme.color, 'router-link']">
           <v-list-item
             @click="setActiveItem('EventsView')"
             :class="{ 'v-list-item--active': isRouteActive('/Events') }"
@@ -96,7 +106,7 @@ function toggleTheme() {
           ></v-list-item>
         </RouterLink>
 
-        <RouterLink to="/StudentRecord" :class="[switchTheme.color, 'router-link']">
+        <RouterLink v-if="user.role === 'admin'"  to="/StudentRecord" :class="[switchTheme.color, 'router-link']">
           <v-list-item
             @click="setActiveItem('StudentRecordView')"
             :class="{ 'v-list-item--active': isRouteActive('/StudentRecord') }"
@@ -106,7 +116,7 @@ function toggleTheme() {
           ></v-list-item>
         </RouterLink>
 
-        <RouterLink to="/Report" :class="[switchTheme.color, 'router-link']">
+        <RouterLink v-if="user.role === 'admin'" to="/Report" :class="[switchTheme.color, 'router-link']">
           <v-list-item
             @click="setActiveItem('ReportView')"
             :class="{ 'v-list-item--active': isRouteActive('/Report') }"
@@ -116,7 +126,7 @@ function toggleTheme() {
           ></v-list-item>
         </RouterLink>
 
-        <RouterLink to="/Archived" :class="[switchTheme.color, 'router-link']">
+        <RouterLink v-if="user.role === 'admin'" to="/Archived" :class="[switchTheme.color, 'router-link']">
           <v-list-item
             @click="setActiveItem('ArchivedFilesView')"
             :class="{ 'v-list-item--active': isRouteActive('/Archived') }"

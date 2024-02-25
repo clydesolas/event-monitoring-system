@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('student_number');
             $table->string('paid_by');
             $table->string('relation');
-            $table->string('payment');
+            $table->float('payment');
             $table->string('date');
             $table->string('duration_date');
             $table->string('semester');

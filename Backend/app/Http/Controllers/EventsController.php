@@ -7,9 +7,9 @@ use App\Models\Transactions;
 use App\Exports\EventsExport;
 use App\Exports\EventsPdfExport;
 use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Support\Facades\DB; 
 use Carbon\Carbon;
-
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 class EventsController extends Controller
 {
     /**
@@ -21,7 +21,65 @@ class EventsController extends Controller
                     ->orderBy('date', 'desc')
                     ->get();
     }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transactions::class, 'event_id', 'event_id');
+    }
+
+    public function upcomingEvents()
+    {
+        $user = Auth::user();
     
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+    
+        $currentDate = now()->toDateString();
+    
+        $events = DB::table('events')
+            ->select(
+                'events.*',
+                DB::raw('CASE WHEN transactions.event_id IS NULL THEN "Not Paid" ELSE "Paid" END as paid_status')
+            )
+            ->leftJoin('transactions', function ($join) use ($user) {
+                $join->on('events.event_id', '=', 'transactions.event_id')
+                    ->where('transactions.student_number', '=', $user->student_number);
+            })
+            ->where('events.status', '!=', 'ARCHIVED')
+            ->where('events.due_date', '>=', $currentDate)
+            ->orderBy('events.date', 'desc')
+            ->get();
+    
+        return response()->json($events);
+    }
+
+    public function userCheckEventChart()
+    {
+        $user = Auth::user();
+    
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+    
+        $currentDate = now()->toDateString();
+    
+        $events = DB::table('events')
+            ->select(
+                'events.*',
+                DB::raw('CASE WHEN transactions.event_id IS NULL THEN "Not Paid" ELSE "Paid" END as paid_status')
+            )
+            ->leftJoin('transactions', function ($join) use ($user) {
+                $join->on('events.event_id', '=', 'transactions.event_id')
+                    ->where('transactions.student_number', '=', $user->student_number);
+            })
+            ->where('events.status', '!=', 'ARCHIVED')
+            ->orderBy('events.date', 'desc')
+            ->get();
+    
+        return response()->json($events);
+    }
+
     public function getArchived()
     {
         return Events::where('status', '=', 'ARCHIVED')

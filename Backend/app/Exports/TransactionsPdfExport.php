@@ -33,6 +33,31 @@ class TransactionsPdfExport
             ->where('status', '!=', 'ARCHIVED')
             ->get();
 
+             $pathToLogo = public_path('logo_white.jpg');
+
+             // Create Mpdf instance
+            $pdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
+            $pdf->SetTitle('Events Export'); 
+
+            $pdf->SetTopMargin(35);
+            // Header content
+            $header = '
+                <div style="position: fixed; margin-right:600px ">
+                    <img src="' . $pathToLogo . '" alt="School Logo" style="max-width: 100px; max-height: 100px;"><br>
+                </div>
+                <div style="position: fixed; top: 10px; left: 120px; text-align: center; margin-bottom: 20px; margin-top:-70px">
+                    <strong style="font-size: 14px">Colegio de Porta Vaga</strong><br>
+                    Myp-Gby Bldg., Emilio Aguinaldo H-Way, Bayan Luma 7, Patindig Araw, Imus City, Cavite<br>
+                    &#128222; 0920 224 7246<br> <!-- Unicode for ☎ -->
+                    &#128231; cdportavaga@gmail.com <br> <!-- Unicode for 📧 -->
+                    &#128279; colegiodeportavaga.edu.ph<br> <!-- Unicode for 🔗 -->
+                </div>
+            ';
+    
+    
+            // Set HTML header content
+            $pdf->SetHeader($header);
+
         // Generate HTML content directly
         $html = '<html><head><title>Events</title></head><body>';
         $html .= '<h2>Transaction Report </h2>';
@@ -62,9 +87,7 @@ class TransactionsPdfExport
 
         $html .= '</tbody></table></body></html>';
 
-        // Create Mpdf instance
-        $pdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4']);
-        $pdf->SetTitle('Events Export');
+      
         
         // Write HTML content to PDF
         $pdf->WriteHTML($html);

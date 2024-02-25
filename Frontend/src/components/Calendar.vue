@@ -2,8 +2,12 @@
     <div>
         <v-toolbar-title :class="['elevation-1 rounded-t-lg pa-5 w-100', switchTheme.bg, switchTheme.color]">Select a date to add event:</v-toolbar-title>
         
-      <VCalendar vc-text-2xl vc-font-bold class="rounded-t-0 tcalendar border-0 elevation-t-0 elevation-1" style="height: 430px !important;" :is-dark="isDarkTheme"  expanded :attributes="attributes" @dayclick="openDialog" />
-  
+      <VCalendar vc-text-2xl vc-font-bold class="rounded-t-0 tcalendar border-0 elevation-t-0 elevation-1" style="height: 345px !important;" :is-dark="isDarkTheme"  expanded :attributes="attributes" @dayclick="openDialog" />
+      <v-alert
+      type="info"
+      text="Select a date for event at least 1 week in advance."
+      variant="tonal"
+      ></v-alert>
       <v-dialog v-model="dialog1" max-width="800">
         <v-card>
         <v-card-title>
@@ -44,20 +48,17 @@
                 >
               </v-select>
               </v-col>
-              <v-col
-                cols="12"
-                sm="4"
-                md="4">
-                <v-text-field
-                  v-model="formData.due_date"
-                  required
-                  type="date"
-                  min=""
-                  hint="Due Date for Payment"
-                  label="Due Date for Payment"
-                  >
-                </v-text-field>
-              </v-col>
+              <v-col cols="12" sm="4" md="4">
+              <v-text-field
+                v-model="formData.due_date"
+                required
+                type="date"
+                :min="minDueDate"
+                :max="maxDueDate"
+                hint="Due Date for Payment"
+                label="Due Date for Payment"
+              ></v-text-field>
+            </v-col>
               <v-col
                 cols="12"
                 sm="4"
@@ -71,17 +72,24 @@
                 </v-text-field>
               </v-col>
               
-              <v-col
-                cols="12"
-                sm="4"
-                md="4">
+              <v-col cols="12" sm="4" md="4">
               <v-select
-                  v-model="formData.duration_date"
+                v-model="formData.duration_date"
                 label="Event Duration"
                 :items="['1 Day', '2 Days', '3 Days', '4 Days', '5 Days', '6 Days', '1 Week']"
-                >
-              </v-select>
-              </v-col>
+                @change="updateDurationRange"
+              ></v-select>
+            </v-col>
+
+            <v-col cols="12" sm="4" md="4">
+              <v-text-field
+                v-model="durationRange"
+                readonly
+                label="Event Duration Range"
+                hint="Automatically calculated based on selected date and duration"
+              ></v-text-field>
+            </v-col>
+
               <v-col
                 cols="12"
                 sm="4"
@@ -181,6 +189,9 @@ import { useStore } from 'vuex';
      
 
       formData.value.date = selectedDate2.value;
+
+      formData.value.duration_date = durationRange.value;
+
       const response = await axios.post('http://127.0.0.1:8000/api/store-event', formData.value,
       {
           headers: {
@@ -212,6 +223,21 @@ todos.value.push(newEvent);
   }
   };
   
+
+  const minDueDate = computed(() => {
+  const today = new Date();
+  today.setDate(today.getDate() + 3); // Minimum due date is 3 days from now
+  return today.toISOString().split('T')[0];
+});
+
+const maxDueDate = computed(() => {
+  if (!selectedDate2.value) return '';
+
+  const selectedDate = new Date(selectedDate2.value);
+  selectedDate.setDate(selectedDate.getDate() - 1); // Maximum due date is 1 day before the selected date
+  return selectedDate.toISOString().split('T')[0];
+});
+
   const currentDate = new Date();
   const currentYear = getYear(currentDate);
   
@@ -224,6 +250,28 @@ todos.value.push(newEvent);
   
     return [currentAcademicYear, nextAcademicYear];
   });
+
+  const durationRange = computed(() => {
+  if (!selectedDate2.value || !formData.value.duration_date) {
+    return '';
+  }
+  const startDate = new Date(selectedDate2.value);
+  const endDate = new Date(startDate);
+
+  // Adjust endDate based on the selected duration
+  const duration = parseInt(formData.value.duration_date);
+  endDate.setDate(endDate.getDate() + duration - 1);
+
+  const formattedStartDate = format(startDate, 'MMM d, yyyy');
+  const formattedEndDate = format(endDate, 'MMM d, yyyy');
+
+  if(formData.value.duration_date == '1 Day'){
+    return `${formattedStartDate}`;
+  }
+  return `${formattedStartDate} - ${formattedEndDate}`;
+});
+
+
   
   const rules = {
     required: (value) => !!value || 'This field is required',
@@ -251,18 +299,30 @@ todos.value.push(newEvent);
     }))
   );
   
+ 
+
   const openDialog = (date) => {
+  const selectedDateValue = new Date(date.id);
+  const currentDateValue = new Date();
+  const oneWeekInMilliseconds = 5 * 24 * 60 * 60 * 1000; // 1 week in milliseconds
+
+  if (selectedDateValue >= currentDateValue && selectedDateValue - currentDateValue >= oneWeekInMilliseconds) {
     dialog1.value = true;
     console.log('Clicked date:', date.id);
-    const formattedDate = new Date(date.id).toLocaleDateString('en-US', {
+    const formattedDate = selectedDateValue.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: '2-digit',
     });
     selectedDate.value = formattedDate;
     selectedDate2.value = date.id;
-    console.log(selectedDate2.value)
-  };
+    console.log(selectedDate2.value);
+  } else {
+    console.log('Selected date is not within 1 week in advance.');
+    snackbarMessage.value = 'NOTE: Select an event date 1 week in advance.';
+      snackbar.value = true;
+  }
+};
   
   const closeDialog = () => {
     dialog1.value = false;

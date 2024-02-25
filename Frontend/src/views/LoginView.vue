@@ -63,7 +63,15 @@
             </div>
           </v-form>
         </v-card>
-    
+     <!-- Snackbar -->
+     <v-snackbar v-model="snackbar.show" :color="snackbar.color" multi-line>
+      {{ snackbar.message }}
+      <template v-slot:action="{ attrs }">
+        <v-btn text v-bind="attrs" @click="snackbar.show = false">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
     </v-container>
     </v-app>
     </template>
@@ -75,11 +83,15 @@
         email: null,
         password: null,
         loading: false,
+        snackbar: {
+          show: false,
+          message: '',
+          color: '',
+        },
         switchTheme: { color: "text-brown", bg: "amber-lighten-5" }
       }),
     
       methods: {
-        // Your existing methods
     
         async archiveStudents() {
           try {
@@ -92,6 +104,11 @@
           } catch (error) {
             console.error("Error archiving students:", error);
           }
+        },
+        showSnackbar(message, color) {
+          this.snackbar.message = message;
+          this.snackbar.color = color;
+          this.snackbar.show = true;
         },
     
         async onSubmit() {
@@ -112,6 +129,8 @@
             this.$router.push({ name: "DashboardView" });
           } catch (error) {
             console.error("Login failed", error);
+              // Show error message in snackbar
+        this.showSnackbar('Login failed. Please check your credentials.', 'error');
           }
     
           this.loading = false;

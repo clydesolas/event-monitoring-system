@@ -8,6 +8,7 @@ import ProfileView from '@/views/ProfileView.vue';
 import StudentRecordView from '@/views/StudentRecordView.vue';
 import ReportView from '@/views/ReportView.vue';
 import ArchivedFilesView from '@/views/ArchivedFilesView.vue';
+import TransactionsView from '@/views/TransactionsView.vue';
 import store from "../store";
 
 const router = createRouter({
@@ -45,7 +46,7 @@ const router = createRouter({
       beforeEnter: (to, from, next) => {
         const isAuthenticated = store.getters.getToken;
         const user = store.getters.getUser;
-        if(isAuthenticated && user.role == 'admin'){
+        if(isAuthenticated){
           next();
         }
         else{
@@ -76,6 +77,21 @@ const router = createRouter({
         const isAuthenticated = store.getters.getToken;
         const user = store.getters.getUser;
         if(isAuthenticated && user.role == 'admin'){
+          next();
+        }
+        else{
+          next('/');
+        }
+      }
+    },
+    {
+      path: '/Transactions',
+      name: 'TransactionsView',
+      component: TransactionsView,
+      beforeEnter: (to, from, next) => {
+        const isAuthenticated = store.getters.getToken;
+        const user = store.getters.getUser;
+        if(isAuthenticated){
           next();
         }
         else{
@@ -120,7 +136,7 @@ const router = createRouter({
       beforeEnter: (to, from, next) => {
         const isAuthenticated = store.getters.getToken;
         const user = store.getters.getUser;
-        if(isAuthenticated && user.role == 'admin'){
+        if(isAuthenticated){
           next();
         }
         else{
